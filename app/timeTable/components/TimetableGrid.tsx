@@ -9,6 +9,7 @@ interface TimetableGridProps {
   timeSlots: string[];
   slotHeight: number;
   headerHeight: number;
+  topRowOffsetMargin: number;
   onDeleteEvent: (eventId: string) => void;
 }
 
@@ -18,6 +19,7 @@ export default function TimetableGrid({
   timeSlots,
   slotHeight,
   headerHeight,
+  topRowOffsetMargin,
   onDeleteEvent,
 }: TimetableGridProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -44,7 +46,6 @@ export default function TimetableGrid({
   }, [slotHeight]);
 
   const getEventStyle = (event: IEvent) => {
-    // Parse HH:MM format
     const [startHour, startMin] = event.startTime.split(":").map(Number);
     const [endHour, endMin] = event.endTime.split(":").map(Number);
 
@@ -56,7 +57,7 @@ export default function TimetableGrid({
     const height = (durationMinutes / 15) * slotHeight;
 
     return {
-      top: `${top}px`,
+      top: `${top + topRowOffsetMargin}px`,
       height: `${height}px`,
       position: "absolute" as const,
     };
@@ -80,7 +81,11 @@ export default function TimetableGrid({
         >
           {/* Time  */}
           <div className="flex min-w-full relative">
-            <TimeSidebar timeSlots={timeSlots} slotHeight={slotHeight} />
+            <TimeSidebar
+              topRowOffsetMargin={topRowOffsetMargin}
+              timeSlots={timeSlots}
+              slotHeight={slotHeight}
+            />
 
             {/* CONTENT AREA: Venues + Grid */}
             <div
@@ -107,7 +112,10 @@ export default function TimetableGrid({
                   style={{ gridColumn: i + 1, gridRow: "1 / -1" }}
                 >
                   {/* Venue Header - Sticky Top */}
-                  <div className="sticky top-0 z-20 h-10 border-b border-gray-200 bg-gray-100 flex items-center justify-center font-semibold text-sm text-gray-700">
+                  <div
+                    style={{ marginBottom: topRowOffsetMargin }}
+                    className="sticky top-0 z-20 h-10 border-b border-gray-200 bg-gray-100 flex items-center justify-center font-semibold text-sm text-gray-700"
+                  >
                     {venue.name}
                   </div>
 
@@ -117,7 +125,7 @@ export default function TimetableGrid({
                     {timeSlots.map((_, i) => (
                       <div
                         key={i}
-                        className="border-b border-gray-100 w-full"
+                        className={`${i === 0 ? "border-t" : ""} border-b border-gray-100 w-full`}
                         style={{ height: `${slotHeight}px` }}
                       />
                     ))}

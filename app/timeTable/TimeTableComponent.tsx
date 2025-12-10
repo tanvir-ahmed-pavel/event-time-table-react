@@ -33,6 +33,7 @@ export default function TimeTableComponent() {
   // Constants
   const SLOT_HEIGHT = 50;
   const HEADER_HEIGHT = 40;
+  const TOP_ROW_OFFSET_MARGIN = 8;
 
   // Initialize Data
   useEffect(() => {
@@ -220,6 +221,7 @@ export default function TimeTableComponent() {
           timeSlots={timeSlots}
           slotHeight={SLOT_HEIGHT}
           headerHeight={HEADER_HEIGHT}
+          topRowOffsetMargin={TOP_ROW_OFFSET_MARGIN}
           onDeleteEvent={handleDeleteEvent}
         />
       </div>
