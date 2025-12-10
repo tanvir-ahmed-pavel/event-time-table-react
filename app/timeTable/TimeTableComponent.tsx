@@ -236,24 +236,24 @@ export default function TimeTableComponent() {
           }`}
         >
           <button
-            onClick={() => setIsAddEventOpen(true)}
-            className="cursor-pointer flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-700 transition-colors"
-          >
-            <span className="text-sm font-medium">Add Event</span>
-            <Calendar size={20} />
-          </button>
-          <button
             onClick={() => setIsAddVenueOpen(true)}
             className="cursor-pointer flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
           >
             <span className="text-sm font-medium">Add Venue</span>
             <MapPin size={20} />
           </button>
+          <button
+            onClick={() => setIsAddEventOpen(true)}
+            className="cursor-pointer flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-700 transition-colors"
+          >
+            <span className="text-sm font-medium">Add Event</span>
+            <Calendar size={20} />
+          </button>
         </div>
 
         {/* Main Floating Button */}
         <button
-          className={`bg-indigo-600 bg-opacity-20 text-white p-4 rounded-full shadow-xl hover:bg-indigo-700 transition-all transform ${
+          className={`bg-indigo-500 bg-opacity-20 text-white p-4 rounded-full shadow-xl hover:bg-indigo-600 transition-all transform ${
             isFabMenuOpen ? "rotate-45" : ""
           }`}
           onMouseEnter={() => setIsFabMenuOpen(true)}

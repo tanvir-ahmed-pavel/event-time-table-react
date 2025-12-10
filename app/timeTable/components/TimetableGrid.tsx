@@ -96,11 +96,12 @@ export default function TimetableGrid({
             >
               {/* Current Time Indicator Line */}
               <div
-                className="absolute left-0 right-0 border-t-2 border-red-500 z-20 pointer-events-none flex items-center"
-                style={{ top: `${currentTimeTop}px` }}
-              >
-                <div className="absolute left-0 w-3 h-3 bg-red-500 rounded-full" />
-              </div>
+                className="absolute border-t-2 border-red-500 z-20 pointer-events-none flex items-center w-full"
+                style={{
+                  top: `${currentTimeTop}px`,
+                  gridColumn: "1 / -1",
+                }}
+              ></div>
               {/* Background Columns (Venues) */}
               {venues.map((venue, i) => (
                 <div
