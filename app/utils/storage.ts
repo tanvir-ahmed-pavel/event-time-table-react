@@ -56,7 +56,7 @@ export const getEvents = (): IEvent[] => {
 
 export const getEventsForDate = (dateStr: string): IEvent[] => {
   const allEvents = getEvents();
-  return allEvents.filter((e) => e.dateStr === dateStr);
+  return allEvents.filter((e) => e.date === dateStr);
 };
 
 // Create Event
@@ -64,6 +64,13 @@ export const createEvent = (event: IEvent) => {
   const events = getEvents();
   events.push(event);
   localStorage.setItem(EVENTS_KEY, JSON.stringify(events));
+};
+
+// Delete Event
+export const deleteEvent = (eventId: string) => {
+  const events = getEvents();
+  const filtered = events.filter((e) => e.id !== eventId);
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(filtered));
 };
 
 // Helper to generate ISO Date string key (YYYY-MM-DD)
@@ -79,23 +86,38 @@ export const seedEvents = () => {
   const today = new Date();
   const dateKey = toDateKey(today);
 
-  // Create a sample event
-  // 10:00 to 11:30 at Venue 1
-  const start = new Date(today);
-  start.setHours(10, 0, 0, 0);
-
-  const end = new Date(today);
-  end.setHours(11, 30, 0, 0);
-
+  // Create a sample event: 10:00 to 11:30 at Venue 1 & 2
   const sampleEvent: IEvent = {
     id: "evt-1",
     name: "Morning Standup",
     description: "Daily team sync",
-    startDate: start.toISOString(),
-    endDate: end.toISOString(),
+    date: dateKey,
+    startTime: "09:00",
+    endTime: "09:30",
+    venueIds: ["venue-1"],
+  };
+
+  const sampleEvent2: IEvent = {
+    id: "evt-2",
+    name: "Morning Standup with 2 venue",
+    description: "Daily team sync",
+    date: dateKey,
+    startTime: "10:00",
+    endTime: "10:30",
     venueIds: ["venue-1", "venue-2"],
-    dateStr: dateKey,
+  };
+
+  const sampleEvent3: IEvent = {
+    id: "evt-3",
+    name: "Morning Standup on venue 3",
+    description: "Daily team sync",
+    date: dateKey,
+    startTime: "09:45",
+    endTime: "11:00",
+    venueIds: ["venue-3"],
   };
 
   createEvent(sampleEvent);
+  createEvent(sampleEvent2);
+  createEvent(sampleEvent3);
 };

@@ -9,6 +9,7 @@ interface TimetableGridProps {
   timeSlots: string[];
   slotHeight: number;
   headerHeight: number;
+  onDeleteEvent: (eventId: string) => void;
 }
 
 export default function TimetableGrid({
@@ -17,6 +18,7 @@ export default function TimetableGrid({
   timeSlots,
   slotHeight,
   headerHeight,
+  onDeleteEvent,
 }: TimetableGridProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [now, setNow] = useState(new Date());
@@ -52,12 +54,13 @@ export default function TimetableGrid({
   }, [slotHeight]);
 
   const getEventStyle = (event: IEvent) => {
-    const startDate = new Date(event.startDate);
-    const endDate = new Date(event.endDate);
+    // Parse HH:MM format
+    const [startHour, startMin] = event.startTime.split(":").map(Number);
+    const [endHour, endMin] = event.endTime.split(":").map(Number);
 
-    const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
-    const durationMinutes =
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60);
+    const startMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
+    const durationMinutes = endMinutes - startMinutes;
 
     const top = (startMinutes / 15) * slotHeight + headerHeight;
     const height = (durationMinutes / 15) * slotHeight;
@@ -144,7 +147,14 @@ export default function TimetableGrid({
                   right: 0,
                 };
 
-                return <EventCard key={event.id} event={event} style={style} />;
+                return (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    style={style}
+                    onDelete={() => onDeleteEvent(event.id)}
+                  />
+                );
               })}
             </div>
           </div>

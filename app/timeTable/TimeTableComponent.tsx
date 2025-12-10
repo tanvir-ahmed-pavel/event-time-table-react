@@ -9,6 +9,7 @@ import {
   addVenue,
   getEvents,
   createEvent,
+  deleteEvent,
 } from "../utils/storage";
 import AddVenueModal from "./components/AddVenueModal";
 import AddEventModal from "./components/AddEventModal";
@@ -110,15 +111,18 @@ export default function TimeTableComponent() {
     endTime: string;
     venueIds: string[];
   }) => {
-    // Construct Date objects for start/end
-    const startObj = new Date(`${eventData.date}T${eventData.startTime}`);
-    const endObj = new Date(`${eventData.date}T${eventData.endTime}`);
-    const newStart = startObj.getTime();
-    const newEnd = endObj.getTime();
+    // Helper to convert HH:MM to minutes for comparison
+    const timeToMinutes = (time: string) => {
+      const [h, m] = time.split(":").map(Number);
+      return h * 60 + m;
+    };
+
+    const newStart = timeToMinutes(eventData.startTime);
+    const newEnd = timeToMinutes(eventData.endTime);
 
     // Conflict Check
     // 1. Get events for this day
-    const dayEvents = events.filter((e) => e.dateStr === eventData.date);
+    const dayEvents = events.filter((e) => e.date === eventData.date);
 
     // 2. Check each selected venue for overlap
     for (const venueId of eventData.venueIds) {
@@ -126,8 +130,8 @@ export default function TimeTableComponent() {
       const venueEvents = dayEvents.filter((e) => e.venueIds.includes(venueId));
 
       for (const existingEvent of venueEvents) {
-        const existingStart = new Date(existingEvent.startDate).getTime();
-        const existingEnd = new Date(existingEvent.endDate).getTime();
+        const existingStart = timeToMinutes(existingEvent.startTime);
+        const existingEnd = timeToMinutes(existingEvent.endTime);
 
         // Check overlap: (StartA < EndB) && (EndA > StartB)
         const hasOverlap = newStart < existingEnd && newEnd > existingStart;
@@ -136,9 +140,9 @@ export default function TimeTableComponent() {
           const venueName =
             venues.find((v) => v.id === venueId)?.name || venueId;
           alert(
-            `Conflict detected!\n\n"${existingEvent.name}" is already scheduled in ${venueName} during this time (${new Date(existingStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(existingEnd).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}).`
+            `Conflict detected!\n\n"${existingEvent.name}" is already scheduled in ${venueName} during this time (${existingEvent.startTime} - ${existingEvent.endTime}).`
           );
-          return; // Abort creation
+          return;
         }
       }
     }
@@ -147,10 +151,10 @@ export default function TimeTableComponent() {
       id: `evt-${Date.now()}`,
       name: eventData.name,
       description: eventData.description,
-      startDate: startObj.toISOString(),
-      endDate: endObj.toISOString(),
+      date: eventData.date,
+      startTime: eventData.startTime,
+      endTime: eventData.endTime,
       venueIds: eventData.venueIds,
-      dateStr: eventData.date,
     };
 
     createEvent(newEvent);
@@ -158,9 +162,14 @@ export default function TimeTableComponent() {
     setIsAddEventOpen(false);
   };
 
+  const handleDeleteEvent = (eventId: string) => {
+    deleteEvent(eventId);
+    setEvents((prev) => prev.filter((e) => e.id !== eventId));
+  };
+
   const getEventCount = (date: Date): number => {
     const key = toDateKey(date);
-    return events.filter((e) => e.dateStr === key).length;
+    return events.filter((e) => e.date === key).length;
   };
 
   return (
@@ -188,7 +197,7 @@ export default function TimeTableComponent() {
           <h1 className="font-bold text-lg text-gray-800">Event Timetable</h1>
           <button
             onClick={handleGoToToday}
-            className="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+            className="cursor-pointer px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
           >
             Today
           </button>
@@ -207,10 +216,11 @@ export default function TimeTableComponent() {
         {/* Schedule Grid Area */}
         <TimetableGrid
           venues={venues}
-          events={events}
+          events={events.filter((e) => e.date === toDateKey(currentDate))}
           timeSlots={timeSlots}
           slotHeight={SLOT_HEIGHT}
           headerHeight={HEADER_HEIGHT}
+          onDeleteEvent={handleDeleteEvent}
         />
       </div>
       {/* Floating Action Button Group */}
@@ -243,7 +253,7 @@ export default function TimeTableComponent() {
 
         {/* Main Floating Button */}
         <button
-          className={`bg-indigo-600 bg-opacity-20 text-white p-4 rounded-full shadow-xl hover:bg-indigo-700/20 transition-all transform ${
+          className={`bg-indigo-600 bg-opacity-20 text-white p-4 rounded-full shadow-xl hover:bg-indigo-700 transition-all transform ${
             isFabMenuOpen ? "rotate-45" : ""
           }`}
           onMouseEnter={() => setIsFabMenuOpen(true)}

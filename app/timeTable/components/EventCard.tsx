@@ -1,9 +1,11 @@
 import { useMemo } from "react";
+import { X } from "lucide-react";
 import type { IEvent } from "../../../types/Event";
 
 interface EventCardProps {
   event: IEvent;
   style: React.CSSProperties;
+  onDelete: () => void;
 }
 
 const EVENT_COLORS = [
@@ -14,7 +16,7 @@ const EVENT_COLORS = [
   "bg-pink-100 border-pink-300 hover:bg-pink-200",
 ];
 
-export default function EventCard({ event, style }: EventCardProps) {
+export default function EventCard({ event, style, onDelete }: EventCardProps) {
   // Random color selection (memoized to be stable for the component lifecycle)
   const colorIndex = useMemo(
     () => Math.floor(Math.random() * EVENT_COLORS.length),
@@ -22,23 +24,36 @@ export default function EventCard({ event, style }: EventCardProps) {
   );
   const colorClass = EVENT_COLORS[colorIndex];
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Delete "${event.name}"?`)) {
+      onDelete();
+    }
+  };
+
   return (
     <div
-      className={`absolute flex flex-col justify-center items-center border p-1 text-xs overflow-hidden transition-colors cursor-pointer shadow-sm z-10 ${colorClass}`}
+      className={`absolute flex flex-col justify-center items-center border p-1 text-xs overflow-hidden transition-colors cursor-pointer shadow-sm z-10 group ${colorClass}`}
       style={style}
       title={`${event.name}\n${event.description}`}
     >
+      {/* Delete Button - appears on hover */}
+      <button
+        onClick={handleDelete}
+        className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+        title="Delete event"
+      >
+        <X size={12} />
+      </button>
+
       <div className="font-semibold truncate text-gray-900">{event.name}</div>
+      {event.description && (
+        <div className="text-gray-600 text-xs truncate max-w-full opacity-80">
+          {event.description}
+        </div>
+      )}
       <div className="text-gray-700 text-xs">
-        {new Date(event.startDate).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}{" "}
-        -{" "}
-        {new Date(event.endDate).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+        {event.startTime} - {event.endTime}
       </div>
     </div>
   );

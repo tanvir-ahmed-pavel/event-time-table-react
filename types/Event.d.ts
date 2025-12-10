@@ -9,10 +9,10 @@ export interface IEvent {
   id: string;
   name: string;
   description: string;
-  startDate: string;
-  endDate: string;
+  date: string; // YYYY-MM-DD format
+  startTime: string; // HH:MM format
+  endTime: string; // HH:MM format
   venueIds: string[];
-  dateStr: string;
 }
 
 export interface IDateNode {
