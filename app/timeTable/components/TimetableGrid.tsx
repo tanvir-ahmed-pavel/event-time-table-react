@@ -21,25 +21,15 @@ export default function TimetableGrid({
   onDeleteEvent,
 }: TimetableGridProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [now, setNow] = useState(new Date());
+  const [now, setNow] = useState<Date | null>(null);
 
-  // Update current time every minute
+  // Set time on client mount and update every minute
   useEffect(() => {
+    setNow(new Date()); // Set initial time on client
     const interval = setInterval(() => {
       setNow(new Date());
     }, 60000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Scroll to current time on mount
-  useEffect(() => {
-    if (scrollRef.current) {
-      const h = now.getHours();
-      const m = now.getMinutes();
-      const slotIndex = h * 4 + Math.floor(m / 15);
-
-      const offset = slotIndex * slotHeight;
-    }
   }, []);
 
   // Initial scroll effect separate from the time update
@@ -72,9 +62,14 @@ export default function TimetableGrid({
     };
   };
 
-  // Calculate Current Time Line Position
-  const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
-  const currentTimeTop = (currentTimeMinutes / 15) * slotHeight + headerHeight;
+  // Calculate Current Time Line Position (only when mounted on client)
+  const currentTimeMinutes = now
+    ? now.getHours() * 60 + now.getMinutes()
+    : null;
+  const currentTimeTop =
+    currentTimeMinutes !== null
+      ? (currentTimeMinutes / 15) * slotHeight + headerHeight
+      : null;
 
   return (
     <div className="flex flex-1 h-full overflow-hidden relative">
@@ -94,14 +89,16 @@ export default function TimetableGrid({
                 gridTemplateColumns: `repeat(${venues.length}, minmax(400px, 1fr))`,
               }}
             >
-              {/* Current Time Indicator Line */}
-              <div
-                className="absolute border-t-2 border-red-500 z-20 pointer-events-none flex items-center w-full"
-                style={{
-                  top: `${currentTimeTop}px`,
-                  gridColumn: "1 / -1",
-                }}
-              ></div>
+              {/* Current Time Indicator Line - only render on client */}
+              {currentTimeTop !== null && (
+                <div
+                  className="absolute border-t-2 border-red-500 z-20 pointer-events-none flex items-center w-full"
+                  style={{
+                    top: `${currentTimeTop}px`,
+                    gridColumn: "1 / -1",
+                  }}
+                />
+              )}
               {/* Background Columns (Venues) */}
               {venues.map((venue, i) => (
                 <div
